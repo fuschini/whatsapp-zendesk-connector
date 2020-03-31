@@ -4,13 +4,13 @@
 
 For this integration to work, you need to have your instance of the **WhatsApp API up and running**.
 
-If you want to understand more about the project you can check out these articles covering its architecture, project decisions and some other general topics:
+If you want to understand more about the project you can check out this article covering its architecture, project decisions and some other general topics:
 
-- Link to article (I'll get to it... someday)
+[Check the article here](https://medium.com/@hfuschini/the-free-whatsapp-zendesk-integration-youve-been-waiting-for-41a63a2c1ce2?sk=1b4e3687c3b953affeae9571e9e7b252).
 
-## Project structure
+Last but not least, this was a very complicated project to document due to its many different components.
 
-*Explain about the main files in here*
+It's a working in progress. If you ever get stuck trying to use it, open an issue and I **will** get back to you. I want you to be succsesfull when using this project :)
 
 ## Getting started
 
@@ -65,19 +65,45 @@ Copy the `envvars.dist` file renaming it to `envvars.json` and fill all the valu
 }
 ```
 
-### Test!
-
-Make sure the webhooks are working
-
 ### First deploy
+
+Run the command `sls dpeloy -s <stage>` with `<stage>` being the stage you want to deploy to.
+
+By the end of the deploy, the framework CLI will output a URL from which your API is available.
+
+Copy this URL, you'll need it.
 
 ### Configure the webhook on WhatsApp API
 
+Your WhatsApp API will have a `PATCH /settings/application` endpoint from which you can update the settings of your API, including setting a webhook URL you want the API to send new events to.
+
+Set the webhook to the endpoint in your API that ends with `whatsapp-webhook` putting it on the webhook url node in the request body.
+
+Make the request and the response should have the new settings already with the new webhook.
+
 ### Configure the webhook on Zendesk
+
+You also need to configure Zendesk to send you a webhook when a ticket with the tag `Whatsapp` gets updated with a response from a Zendesk agent.
+
+1. Create a webhook with a HTTP target following the instructions on [this link](https://support.zendesk.com/hc/en-us/articles/204890268-Creating-webhooks-with-the-HTTP-target)
+
+> For the name of your webhook use `Whatsapp Integration` and in the Url field use the endpoint of the integration that ends with `/zendesk/webhook`
+
+2. Go to Settings > Triggers on the Zendesk Zupport UI and select **Add trigger**
+
+3. Configure your **Conditions** section so it looks like this:
+
+![zendesk_trigger_conditions](/screenshots/zendesk_trigger_conditions.png)
+
+4. Configure your **Actions** section so it looks like this:
+
+![zendesk_webhook_actions](/screenshots/zendesk_webhook_actions.png)
+
+5. Finish hitting Save
 
 ## Testing the functions
 
-There is a directory called *test_data* with many JSON files. Those files can be used as inputs for your lambda functions when testing locally. Simply use the following:
+You can run the functions of the integration locally with:
 
 ```
 serverless invoke local -f <function> -p <path_to_test_file>
@@ -85,12 +111,16 @@ serverless invoke local -f <function> -p <path_to_test_file>
 
 Where `function` is the name of the function as in the function node on `serverless.yml` file and `path_to_test_file` is the path to the file you want to use as input.
 
+> I sugest you copy some of the input objects sent to Dynamo Streams, WhatsApp Webhooks and Zendesk Webhooks to a local folder to use them as inputs for your local tests.
+
 ## Deploying the service
 
-Simply run:
+After making sure your functions work locally. Simply run:
 
 ```
 serverless deploy -s <stage>
 ```
 
 Where `stage` is the deployment stage you want. The stage is going to be used as a sufix in all functions names.
+
+And you should be good to go!
