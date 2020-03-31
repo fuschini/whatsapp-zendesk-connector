@@ -1,0 +1,16 @@
+{
+  "generalRole": "",
+  "zendeskApiBaseUrl": "",
+  "zendeskUser": "",
+  "zendeskPwd": "",
+  "zendeskToken": "",
+  "whatsappMessagesTable": "",
+  "whatsappMessagesTableStreamArn"
+  "whatsappTicketsTable": "",
+  "commentsFromZendeskTable": "",
+  "commentsFromZendeskTableStreamArn"
+  "whatsappUser": "",
+  "whatsappPwd": "",
+  "whatsappBaseUrl": "",
+  "whatsappMediaBucket": ""
+}

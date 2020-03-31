@@ -1,0 +1,90 @@
+# Full .yml options can be found at
+# https://serverless.com/framework/docs/providers/aws/guide/serverless.yml/
+
+service: whatsapp-zendesk-connector
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: us-east-1
+
+  # stage can be passed as parameter in deploy with 'sls deploy -stage <stage>'. Default is dev
+  stage: ${opt:stage, "dev"}
+
+  # service level envvars
+  environment:
+    stage: ${self:provider.stage}
+    whatsappMessagesTable: ${file(envvars.json):whatsappMessagesTable}
+    whatsappMessagesTableStreamArn: ${file(envvars.json):whatsappMessagesTableStreamArn}
+    whatsappTicketsTable: ${file(envvars.json):whatsappTicketsTable}
+    commentsFromZendeskTable: ${file(envvars.json):commentsFromZendeskTable}
+    commentsFromZendeskTableStreamArn: ${file(envvars.json):commentsFromZendeskTableStreamArn}
+    zendeskApiBaseUrl: ${file(envvars.json):zendeskApiBaseUrl}
+    zendeskUser: ${file(envvars.json):zendeskUser}
+    zendeskPwd: ${file(envvars.json):zendeskPwd}
+    zendeskToken: ${file(envvars.json):zendeskToken}
+    whatsappUser: ${file(envvars.json):whatsappUser}
+    whatsappPwd: ${file(envvars.json):whatsappPwd}
+    whatsappBaseUrl: ${file(envvars.json):whatsappBaseUrl}
+    whatsappMediaBucket: ${file(envvars.json):whatsappMediaBucket}
+
+  package:
+    excludeDevDependencies: true
+
+functions:
+
+  whatsapp-webhook:
+    handler: WP_Webhook.handler
+    name: whatsapp-webhook-${self:provider.stage} # NOTE keep stage in function name to avoid duplicate resources names
+    description: Executed when a new message arrives from whatsapp
+    memorySize: 128
+    timeout: 10
+    role: ${file(envvars.json):generalRole}
+
+    events:
+      - http:
+          path: /whatsapp/webhook
+          method: any
+
+  #############################################################################
+
+  dynamo-to-zendesk:
+    handler: WP_dynamo_to_zendesk.handler
+    name: whatsapp-dynamo-2-zendesk-${self:provider.stage} # NOTE keep stage in function name to avoid duplicate resources names
+    description: Executed when a new message is saved/updated in DynamoDB and sends the message to Zendesk
+    memorySize: 128
+    timeout: 30
+    role: ${file(envvars.json):generalRole}
+
+    events:
+      - stream: ${file(envvars.json):whatsappMessagesTableStreamArn}
+
+  #############################################################################
+
+  zendesk-webhook:
+    handler: ZDK_Webhook.handler
+    name: zendesk-webhook-${self:provider.stage} # NOTE keep stage in function name to avoid duplicate resources names
+    description: Executed when a new message arrives from zendesk webhook
+    memorySize: 128
+    timeout: 10
+    role: ${file(envvars.json):generalRole}
+
+    events:
+      - http:
+          path: /zendesk/webhook
+          method: any
+
+  #############################################################################
+
+  dynamo-to-whatsapp:
+    handler: ZDK_dynamo_to_whatsapp.handler
+    name: dynamo-2-whatsapp-${self:provider.stage} # NOTE keep stage in function name to avoid duplicate resources names
+    description: Executed when a new comment is saved/updated in zendesk-replies table and sends the message to Whatsapp
+    memorySize: 128
+    timeout: 10
+    role: ${file(envvars.json):generalRole}
+
+    events:
+      - stream: ${file(envvars.json):commentsFromZendeskTableStreamArn}
+
+#############################################################################

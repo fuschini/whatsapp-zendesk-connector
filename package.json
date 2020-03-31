@@ -1,0 +1,17 @@
+{
+  "name": "whatsapp-zendesk-connector",
+  "version": "1.0.0",
+  "description": "Serverless functions used as middleware between Zendesk's and Whatsapp's APIs",
+  "main": "index.js",
+  "scripts": {},
+  "author": "Henrique Fuschini",
+  "license": "ISC",
+  "devDependencies": {
+    "aws-sdk": "^2.639.0"
+  },
+  "dependencies": {
+    "axios": "^0.19.2",
+    "node-zendesk": "^1.4.0",
+    "request": "^2.88.2"
+  }
+}
