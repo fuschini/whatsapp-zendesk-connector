@@ -4,8 +4,6 @@
 
 For this integration to work, you need to have your instance of the **WhatsApp API up and running**.
 
-It's known that Facebook isn't very liberal about giving access to everyone, but I hope one day everyone will have access to it and will be able to use this integration.
-
 If you want to understand more about the project you can check out these articles covering its architecture, project decisions and some other general topics:
 
 - Link to article (I'll get to it... someday)
@@ -22,7 +20,7 @@ If you want to understand more about the project you can check out these article
 
 2. Install the [serverless framework CLI](https://serverless.com/) and [configure the AWS credentials](https://serverless.com/framework/docs/providers/aws/cli-reference/config-credentials/) for it.
 
-### Create the resources
+### Create the resources you'll use
 
 1. `whatsapp_messages` DynamoDB table with the primary key `wa_id` and the sorting key `msg_id`
 
@@ -44,9 +42,28 @@ After creating the streams, copy the **Latest stream ARN**. You'll need for the 
 
 If you don't want to create the role manually, you can configure the lambda permissions in the `serverless.yml` file as shown in [this article](https://serverless.com/framework/docs/providers/aws/guide/iam/).
 
-### Create the envvars.json
+### Set your environment variables
 
-...
+Copy the `envvars.dist` file renaming it to `envvars.json` and fill all the values in it. Here's the description of everything you'll need:
+
+```json
+{
+  "generalRole": "the ARN of the general IAM role you created",
+  "zendeskApiBaseUrl": "base URL of your Zendesk API",
+  "zendeskUser": "email of the zendesk user you'll use to auth the API",
+  "zendeskPwd": "password of the user you'll use to auth the API",
+  "zendeskToken": "a Zendesk API token ",
+  "whatsappMessagesTable": "the name of the whatsapp_messages table on Dynamo",
+  "whatsappMessagesTableStreamArn": "ARN of the Stream you created for the whatsapp_messages",
+  "whatsappTicketsTable": "the name of the open_tickets table on Dynamo",
+  "commentsFromZendeskTable": "the name of zendesk_messages table on Dynamo",
+  "commentsFromZendeskTableStreamArn": "ARN of the Stream you created for the zendesk_messages",
+  "whatsappUser": "username for the admin user of your WhatsApp API",
+  "whatsappPwd": "password for the admin user of your WhatsApp API",
+  "whatsappBaseUrl": "base URL for your WhatsApp API",
+  "whatsappMediaBucket": "the name of the bucket you created to store the audio messages"
+}
+```
 
 ### Test!
 
