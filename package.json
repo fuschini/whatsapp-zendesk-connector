@@ -10,7 +10,7 @@
     "aws-sdk": "^2.639.0"
   },
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "node-zendesk": "^1.4.0",
     "request": "^2.88.2"
   }
